@@ -1,0 +1,58 @@
+### CREADO POR GPT 
+# ===== MAVEN =====
+target/
+*.jar
+*.war
+*.ear
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+# ===== SPRING BOOT =====
+*.properties.local
+application-local.properties
+application-local.yml
+
+# ===== IDEs =====
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# Eclipse
+.eclipse/
+.classpath
+.project
+.settings/
+bin/
+
+# ===== SISTEMA OPERATIVO =====
+# Mac
+.DS_Store
+.AppleDouble
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Linux
+*~
+
+# ===== LOGS =====
+*.log
+logs/
+spring.log
+
+# ===== VARIABLES DE ENTORNO =====
+.env
+.env.local
+.env.*
+
+# ===== DOCKER (si usas) =====
+# docker-compose.override.yml
