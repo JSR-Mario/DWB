@@ -10,24 +10,29 @@ public class Category {
 
     @Id
     private Integer categoryID;
-    private String name;
+    private String category;
+    private String tag;
+    private Integer status;
 
     public Category(){}
 
-    public Integer getId() {
-        return categoryID;
-    }
-
-    public void setId(Integer categoryID) {
+    public Category(int categoryID,String category,String tag,int status){
         this.categoryID = categoryID;
+        this.category = category;
+        this.tag = tag;
+        this.status = status;
     }
 
-    public String getName() {
-        return name;
-    }
+    public Integer getId() {return categoryID;}
+    public void setId(Integer categoryID) {this.categoryID = categoryID;}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getCategory() {return category;}
+    public void setCategory(String category) {this.category = category;}
+    
+    public String getTag() {return tag;}
+    public void setTag(String tag) {this.tag = tag;}
+
+    public Integer getStatus() {return status;}
+    public void setStatus(Integer status) {this.status = status;}
 
 }
