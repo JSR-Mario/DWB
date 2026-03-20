@@ -19,7 +19,6 @@ public class Response<T> {
         this.success = true;
     }
 
-    // Getters and Setters
     public T getData() {
         return data;
     }
