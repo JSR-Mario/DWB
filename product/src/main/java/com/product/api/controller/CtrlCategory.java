@@ -12,8 +12,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.product.api.dto.DtoCategoryIn;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import com.product.api.dto.Response;
+
+import com.product.api.dto.DtoCategoryIn;
 import java.util.List;
 
 @RestController
@@ -34,7 +40,7 @@ public class CtrlCategory {
     private CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<Response<List<Category>>> getCategories() {
+    public ResponseEntity<List<Category>> getCategories() {
         return ResponseEntity.ok(categoryService.findAll());
     }
 
@@ -44,22 +50,28 @@ public class CtrlCategory {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createCategory(@Valid @RequestBody DtoCategoryIn in) {
-        return ResponseEntity.ok(categoryService.create(in));
+    public ResponseEntity<Response> createCategory(@Valid @RequestBody DtoCategoryIn in) {
+        categoryService.create(in);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new Response("La categoria ha sido registrada"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateCategory(@Valid @RequestBody DtoCategoryIn in, @PathVariable Long id) {
-        return ResponseEntity.ok(categoryService.update(in, id));
+    public ResponseEntity<Response> updateCategory(
+            @Valid @RequestBody DtoCategoryIn in,
+            @PathVariable Long id) {
+        categoryService.update(in, id);
+        return ResponseEntity.ok(new Response("La categoria ha sido actualizada"));
     }
 
     @PatchMapping("/{id}/enable")
-    public ResponseEntity<ApiResponse> enableCategory(@PathVariable Long id) {
-        return ResponseEntity.ok(categoryService.enable(id));
+    public ResponseEntity<Response> enableCategory(@PathVariable Long id) {
+        categoryService.enable(id);
+        return ResponseEntity.ok(new Response("La categoria ha sido habilitada"));
     }
 
     @PatchMapping("/{id}/disable")
-    public ResponseEntity<ApiResponse> disableCategory(@PathVariable Long id) {
-        return ResponseEntity.ok(categoryService.disable(id));
+    public ResponseEntity<Response> disableCategory(@PathVariable Long id) {
+        categoryService.disable(id);
+        return ResponseEntity.ok(new Response("La categoria ha sido deshabilitada"));
     }
 }
