@@ -56,3 +56,6 @@ spring.log
 
 # ===== DOCKER (si usas) =====
 # docker-compose.override.yml
+
+# ===== AGENTS =====
+.agents/*
