@@ -56,11 +56,11 @@ public class CtrlCategory {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateCategory(
+    public ResponseEntity<String> updateCategory(
             @Valid @RequestBody DtoCategoryIn in,
             @PathVariable Long id) {
         categoryService.update(in, id);
-        return ResponseEntity.ok(new Response("La categoria ha sido actualizada"));
+        return ResponseEntity.ok("La categoria ha sido actualizada");
     }
 
     @PatchMapping("/{id}/enable")
