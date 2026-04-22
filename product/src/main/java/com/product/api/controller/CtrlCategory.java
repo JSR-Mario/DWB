@@ -3,7 +3,6 @@ package com.product.api.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,37 +28,33 @@ public class CtrlCategory {
 
     @GetMapping
     public ResponseEntity<List<Category>> getCategories() {
-        return ResponseEntity.ok(categoryService.findAll());
+        return categoryService.findAll();
     }
 
     @GetMapping("/active")
     public ResponseEntity<List<Category>> findActiveCategories() {
-        return ResponseEntity.ok(categoryService.findActive());
+        return categoryService.findActive();
     }
 
     @PostMapping
     public ResponseEntity<String> createCategory(@Valid @RequestBody DtoCategoryIn in) {
-        categoryService.create(in);
-        return ResponseEntity.status(HttpStatus.CREATED).body("La categoria ha sido registrada");
+        return categoryService.create(in);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCategory(
             @Valid @RequestBody DtoCategoryIn in,
             @PathVariable Long id) {
-        categoryService.update(in, id);
-        return ResponseEntity.ok("La categoria ha sido actualizada");
+        return categoryService.update(in, id);
     }
 
     @PatchMapping("/{id}/enable")
     public ResponseEntity<String> enableCategory(@PathVariable Long id) {
-        categoryService.enable(id);
-        return ResponseEntity.ok("La categoria ha sido habilitada");
+        return categoryService.enable(id);
     }
 
     @PatchMapping("/{id}/disable")
     public ResponseEntity<String> disableCategory(@PathVariable Long id) {
-        categoryService.disable(id);
-        return ResponseEntity.ok("La categoria ha sido deshabilitada");
+        return categoryService.disable(id);
     }
 }
