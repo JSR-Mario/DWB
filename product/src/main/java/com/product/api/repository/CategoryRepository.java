@@ -17,4 +17,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByCategory(String category);
 
     boolean existsByCategoryAndCategoryIDNot(String category, Long categoryID);
+
+    boolean existsByTag(String tag);
+
+    boolean existsByTagAndCategoryIDNot(String tag, Long categoryID);
 }

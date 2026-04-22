@@ -52,6 +52,9 @@ public class CategoryServiceImpl implements CategoryService {
             if (repoCategory.existsByCategory(in.getCategory())) {
                 throw new ApiException("La categoria ya existe: " + in.getCategory(), HttpStatus.CONFLICT);
             }
+            if (repoCategory.existsByTag(in.getTag())) {
+                throw new ApiException("El tag ya existe: " + in.getTag(), HttpStatus.CONFLICT);
+            }
 
             Category category = new Category();
             category.setCategory(in.getCategory());
@@ -75,6 +78,10 @@ public class CategoryServiceImpl implements CategoryService {
             if (repoCategory.existsByCategoryAndCategoryIDNot(in.getCategory(), categoryID)) {
                 throw new ApiException(
                         "El nombre de la categoria ya esta en uso: " + in.getCategory(), HttpStatus.CONFLICT);
+            }
+            if (repoCategory.existsByTagAndCategoryIDNot(in.getTag(), categoryID)) {
+                throw new ApiException(
+                        "El tag de la categoria ya esta en uso: " + in.getTag(), HttpStatus.CONFLICT);
             }
 
             category.setCategory(in.getCategory());
