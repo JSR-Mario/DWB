@@ -1,69 +1,85 @@
-# Proyecto: Desarrollo Web Backend (DWB)
+<!-- 
+<div align="center">
+  <img src="path/to/your/project-banner-or-logo.png" alt="Project Banner" width="100%">
+</div> 
+-->
 
-Bienvenido al repositorio central de la asignatura Desarrollo Web Backend (UNAM). Este proyecto es un ecosistema basado en una arquitectura de microservicios independientes que trabajan en conjunto para gestionar la logica de negocio de la plataforma.
+<div align="center">
 
----
+# E-Commerce Microservices Architecture (Backend)
 
-## Tech Stack
+![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.x-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![Hibernate](https://img.shields.io/badge/Hibernate-ORM-59666C?style=for-the-badge&logo=hibernate&logoColor=white)
 
-El proyecto esta construido siguiendo los estandares de la industria para desarrollo en Java:
+</div>
 
-*   Lenguaje: Java 21
-*   Framework Core: Spring Boot 4.x
-*   Seguridad: Spring Security + JSON Web Tokens (JWT)
-*   Persistencia: Spring Data JPA + Hibernate
-*   Base de Datos: MySQL
-*   Construccion y Dependencias: Maven Wrapper (mvnw)
-*   Validaciones: Jakarta Validation (spring-boot-starter-validation)
-
----
-
-## Microservicios y Funcionalidades
-
-### 1. Auth Service (/auth-service)
-*   Puerto de ejecucion: 8082
-*   Responsabilidad: Motor principal de autenticacion, control de acceso y generacion de credenciales JWT.
-*   Funcionalidades Destacadas:
-    *   POST /user: Registro seguro de nuevos usuarios (las contraseñas se cifran mediante BCryptPasswordEncoder).
-    *   POST /login: Validacion de credenciales y generacion del token JWT firmado con algoritmo HMAC-SHA256.
-
-### 2. Product Service (/product)
-*   Puerto de ejecucion: 8080
-*   Responsabilidad: Administracion de todo el catalogo, inventario y agrupacion de categorias.
-*   Seguridad: Endpoints interceptados por un JwtAuthFilter. Permite acceso diferenciado entre roles ADMIN y CUSTOMER.
-*   Funcionalidades Destacadas:
-    *   Catalogo y Categorias: CRUD completo. Manejo estricto de unicidad de campos (GTIN, Nombres, Tags).
-    *   Gestor de Archivos (Imagenes): Las imagenes se guardan de manera fisica en el disco (uploads/img/) e internamente se procesan y devuelven como tramas Base64 via JPQL custom querys (INNER JOIN).
+Central repository for the Web Backend Development course (UNAM). This project demonstrates a robust, scalable backend ecosystem built on an independent microservices architecture, working concurrently to manage core business logic.
 
 ---
 
-## Como Correr el Proyecto (Entorno Local)
+## Architecture & Tech Stack
 
-### Requisitos Previos
-1.  Java 21 configurado en tus variables de entorno.
-2.  Servidor MySQL corriendo en el puerto 3306.
-3.  Una base de datos llamada dwb_database con usuario root y contraseña root (Configuracion por defecto del application-local.properties).
+This project is built following modern industry standards for enterprise Java development:
 
-### Pasos de Ejecucion
+*   **Language:** Java 21
+*   **Core Framework:** Spring Boot 4.x
+*   **Security:** Spring Security with Stateless JSON Web Tokens (JWT)
+*   **Data Persistence:** Spring Data JPA + Hibernate ORM
+*   **Database:** MySQL
+*   **Build Tool:** Maven Wrapper (`mvnw`)
+*   **Validation:** Jakarta Validation (`spring-boot-starter-validation`)
 
-Dado que es una arquitectura distribuida, necesitas levantar cada microservicio en su propia terminal.
+---
 
-Paso 1: Levantar el Servicio de Autenticacion
+## Microservices & Core Features
+
+### 1. Auth Service (`/auth-service`)
+*   **Port:** `8082`
+*   **Role:** Identity Provider (IdP) and Authorization Server. Handles user management and JWT credential generation.
+*   **Key Features:**
+    *   `POST /user`: Secure user registration featuring password encryption via `BCryptPasswordEncoder`.
+    *   `POST /login`: Credential validation and JWT generation (signed using HMAC-SHA256).
+
+### 2. Product Service (`/product`)
+*   **Port:** `8080`
+*   **Role:** Resource Server managing the product catalog, inventory, and categorization.
+*   **Security:** Endpoints are secured via a custom `JwtAuthFilter`, implementing Role-Based Access Control (RBAC) with differentiated access for `ADMIN` and `CUSTOMER` roles.
+*   **Key Features:**
+    *   **Catalog & Categories:** Full CRUD capabilities with strict field uniqueness constraints (GTIN, Names, Tags).
+    *   **Media Management:** Physical filesystem storage for images (`uploads/img/`). Images are dynamically processed and returned as Base64 encoded strings via custom JPQL queries (`INNER JOIN`).
+
+---
+
+## Local Development Setup
+
+### Prerequisites
+1.  **Java 21** installed and configured in your environment variables.
+2.  **MySQL Server** running on port `3306`.
+3.  A local database named `dwb_database` configured with default credentials (`root` / `root`) or updated in the `application-local.properties` file.
+
+### Execution Steps
+
+Due to its distributed architecture, each microservice must be run in a separate terminal instance.
+
+**Step 1: Start the Auth Service**
 ```bash
 cd auth-service/auth
 ./mvnw clean spring-boot:run
 ```
 
-Paso 2: Levantar el Servicio de Productos
+**Step 2: Start the Product Service**
 ```bash
 cd product
 ./mvnw clean spring-boot:run
 ```
 
-Paso 3: Crear tu Identidad (Postman)
-1. Haz un POST a http://localhost:8082/user para registrar tus datos.
-2. Nota de Administrador: Por defecto el sistema te da el rol "User". Ve a tu gestor de base de datos (ej. DBeaver) y ejecuta UPDATE user_roles SET roles = 'ADMIN' WHERE user_id = 1; para obtener permisos totales.
-3. Haz un POST a http://localhost:8082/login con tus credenciales. Obtendras tu Token JWT.
+**Step 3: Identity Creation (via Postman or similar client)**
+1. Send a `POST` request to `http://localhost:8082/user` with your registration payload.
+2. *Admin Note:* The system assigns the `"User"` role by default. To gain full access, manually update your role in the database (e.g., via DBeaver): `UPDATE user_roles SET roles = 'ADMIN' WHERE user_id = 1;`
+3. Send a `POST` request to `http://localhost:8082/login` with your credentials to receive your **JWT Token**.
 
-Paso 4: Consumir la API Segura
-Copia el Token que acabas de generar, ve a cualquier peticion de tu Product service (ej. GET http://localhost:8080/product/1), en la pestaña Authorization selecciona Bearer Token, pega el codigo y listo.
+**Step 4: Consuming the Secure API**
+Copy the generated token. For any subsequent request to the Product service (e.g., `GET http://localhost:8080/product/1`), go to the **Authorization** tab, select **Bearer Token**, paste your token, and execute the request.
