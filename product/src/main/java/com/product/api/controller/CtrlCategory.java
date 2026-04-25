@@ -17,10 +17,12 @@ import com.product.api.dto.in.DtoCategoryIn;
 import com.product.api.entity.Category;
 import com.product.api.service.CategoryService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/category")
+@Tag(name = "Category", description = "Catálogo de categorías")
 public class CtrlCategory {
 
     @Autowired

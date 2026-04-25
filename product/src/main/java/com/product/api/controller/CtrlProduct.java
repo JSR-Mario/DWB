@@ -22,10 +22,12 @@ import com.product.api.entity.ProductImage;
 import com.product.api.service.SvcProduct;
 import com.product.api.service.SvcProductImage;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/product")
+@Tag(name = "Product", description = "Catálogo de productos")
 public class CtrlProduct {
 
 	@Autowired
