@@ -1,19 +1,23 @@
 package com.product.api.service;
 
 import java.util.List;
-import com.product.api.entity.Category;
+
+import org.springframework.http.ResponseEntity;
+
 import com.product.api.dto.in.DtoCategoryIn;
+import com.product.api.entity.Category;
 
 public interface CategoryService {
-    List<Category> findAll();
 
-    List<Category> findActive();
+    ResponseEntity<List<Category>> findAll();
 
-    void create(DtoCategoryIn in);
+    ResponseEntity<List<Category>> findActive();
 
-    void update(DtoCategoryIn in, Long categoryID);
+    ResponseEntity<String> create(DtoCategoryIn in);
 
-    void enable(Long categoryID);
+    ResponseEntity<String> update(DtoCategoryIn in, Long categoryID);
 
-    void disable(Long categoryID);
+    ResponseEntity<String> enable(Long categoryID);
+
+    ResponseEntity<String> disable(Long categoryID);
 }

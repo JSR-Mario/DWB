@@ -58,4 +58,4 @@ spring.log
 # docker-compose.override.yml
 
 # ===== AGENTS =====
-.agents/*
+.agents/
