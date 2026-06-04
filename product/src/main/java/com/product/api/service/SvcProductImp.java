@@ -16,6 +16,7 @@ import java.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.product.api.dto.in.DtoProductIn;
+import com.product.api.dto.in.DtoStockIn;
 import com.product.api.dto.out.DtoProductListOut;
 import com.product.api.dto.out.DtoProductOut;
 import com.product.api.entity.Product;
@@ -65,6 +66,19 @@ public class SvcProductImp implements SvcProduct {
 			String image = readProductImageFile(id);
 			product.setImage(image);
 
+			return new ResponseEntity<>(product, HttpStatus.OK);
+		} catch (DataAccessException e) {
+			throw new DBAccessException(e);
+		}
+	}
+
+	@Override
+	public ResponseEntity<DtoProductOut> getProductByGtin(String gtin) {
+		try {
+			DtoProductOut product = repo.getProductByGtin(gtin);
+			if (product == null) {
+				throw new ApiException("El gtin del producto no existe", HttpStatus.NOT_FOUND);
+			}
 			return new ResponseEntity<>(product, HttpStatus.OK);
 		} catch (DataAccessException e) {
 			throw new DBAccessException(e);
@@ -129,6 +143,24 @@ public class SvcProductImp implements SvcProduct {
 			product.setStatus(0);
 			repo.save(product);
 			return new ResponseEntity<>("El producto ha sido desactivado", HttpStatus.OK);
+		} catch (DataAccessException e) {
+			throw new DBAccessException(e);
+		}
+	}
+
+	@Override
+	public ResponseEntity<String> updateStock(String gtin, DtoStockIn in) {
+		try {
+			Product product = repo.findByGtin(gtin)
+					.orElseThrow(() -> new ApiException("El gtin del producto no existe", HttpStatus.NOT_FOUND));
+
+			int newStock = product.getStock() + in.getQuantity();
+			if (newStock < 0) {
+				throw new ApiException("Stock insuficiente para el producto: " + gtin, HttpStatus.CONFLICT);
+			}
+			product.setStock(newStock);
+			repo.save(product);
+			return new ResponseEntity<>("El stock ha sido actualizado", HttpStatus.OK);
 		} catch (DataAccessException e) {
 			throw new DBAccessException(e);
 		}
