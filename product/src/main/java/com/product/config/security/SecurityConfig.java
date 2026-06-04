@@ -35,9 +35,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/category", "/category/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/category", "/category/**").hasAuthority("ADMIN")
                 
-                // Productos
+                // Productos — lectura compartida, escritura solo ADMIN
                 .requestMatchers(HttpMethod.GET, "/product/{id}").hasAnyAuthority("ADMIN", "CUSTOMER")
                 .requestMatchers(HttpMethod.GET, "/product/{id}/image").hasAnyAuthority("ADMIN", "CUSTOMER")
+                .requestMatchers(HttpMethod.GET, "/product/gtin/{gtin}").hasAnyAuthority("ADMIN", "CUSTOMER")
                 .requestMatchers(HttpMethod.GET, "/product").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/product", "/product/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/product", "/product/**").hasAuthority("ADMIN")
