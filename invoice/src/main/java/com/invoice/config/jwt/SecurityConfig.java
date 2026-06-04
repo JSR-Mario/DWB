@@ -23,7 +23,7 @@ public class SecurityConfig {
 		http.csrf(AbstractHttpConfigurer::disable)
 		.authorizeHttpRequests(
 				auth -> auth
-				.requestMatchers("/error", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/info", "/actuator/health").permitAll()
+				.requestMatchers("/error", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
 				.requestMatchers("/cart-item/**").hasAuthority("CUSTOMER")
 				.requestMatchers(HttpMethod.GET, "/invoice/**").hasAnyAuthority("ADMIN", "CUSTOMER")
 				.requestMatchers(HttpMethod.POST,"/invoice").hasAuthority("CUSTOMER")

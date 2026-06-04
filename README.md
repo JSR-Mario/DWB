@@ -1,68 +1,108 @@
-<!-- 
-<div align="center">
-  <img src="path/to/your/project-banner-or-logo.png" alt="Project Banner" width="100%">
-</div> 
--->
-
 <div align="center">
 
 # E-Commerce Microservices Architecture (Backend)
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.3-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
-![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
+![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-2025.1.1-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Hibernate](https://img.shields.io/badge/Hibernate-ORM-59666C?style=for-the-badge&logo=hibernate&logoColor=white)
 
 </div>
 
-Central repository for the Web Backend Development course (UNAM). This project demonstrates a robust, scalable backend ecosystem built on an independent microservices architecture, working concurrently to manage core business logic.
+Central repository for the Web Backend Development course (UNAM). This project implements a complete e-commerce backend with shopping cart, invoicing, and a full microservices infrastructure (Registry, Config, Gateway, Admin).
 
 ---
 
-## Architecture & Tech Stack
+## Architecture Overview
 
-This project is built following modern industry standards for enterprise Java development:
-
-*   **Language:** Java 21
-*   **Core Framework:** Spring Boot 4.0.3
-*   **Security:** Spring Security with Stateless JSON Web Tokens (JWT via jjwt 0.11.5)
-*   **Data Persistence:** Spring Data JPA + Hibernate ORM
-*   **Database:** MySQL (`dwb_database`)
-*   **Build Tool:** Maven Wrapper (`mvnw`)
-*   **Validation:** Jakarta Validation (`spring-boot-starter-validation`)
+```
+                          ┌─────────────────┐
+                          │   Admin (9091)   │
+                          │  Spring Boot     │
+                          │  Admin Server    │
+                          └────────┬─────────┘
+                                   │ monitors
+┌──────────────┐          ┌────────▼─────────┐
+│ Config (8888)│◄─────────│ Registry (8761)  │
+│ Cloud Config │  eureka  │  Eureka Server   │
+└──────────────┘          └────────▲─────────┘
+                                   │ registers
+              ┌────────────────────┼────────────────────┐
+              │                    │                     │
+     ┌────────┴───────┐  ┌────────┴───────┐  ┌─────────┴──────┐
+     │  Auth (8082)   │  │ Product (8080) │  │ Invoice (8084) │
+     │  JWT / Users   │  │  Catalog/Stock │  │  Cart/Invoice  │
+     └────────────────┘  └────────────────┘  └────────────────┘
+              ▲                    ▲                     ▲
+              │                    │                     │
+              └────────────────────┴─────────────────────┘
+                          ┌────────┴─────────┐
+                          │  Gateway (9090)  │
+                          │  Cloud Gateway   │
+                          └──────────────────┘
+                                   ▲
+                              Client Requests
+```
 
 ---
 
-## Microservices & Core Features
+## Services & Ports
 
-### 1. Auth Service (`/auth-service/auth`)
-*   **Port:** `8082`
-*   **Config:** `application.yaml`
-*   **Role:** Identity Provider (IdP) and Authorization Server. Handles user management and JWT credential generation.
-*   **Key Features:**
-    *   `POST /user` — Secure user registration with password encryption (`BCryptPasswordEncoder`) and field validation (email format, password strength, phone number format). Default role: `User`.
-    *   `POST /login` — Credential validation and JWT generation (signed HMAC-SHA256). Token includes: `sub` (username), `id` (user ID), `roles`. Expires in 1 hour.
-    *   `GET /user` — List all users (requires `Administrator` authority).
-*   **Error Handling:** `GlobalExceptionHandler` handles validation errors, duplicate entries (`DataIntegrityViolationException`), bad credentials, and generic exceptions. Returns `Map<String, String>` bodies.
-*   **Note:** Uses Lombok (`@Data`, `@Getter`, `@Setter`) for DTOs and entities.
+| Service          | Port | Description                                  |
+|------------------|------|----------------------------------------------|
+| Registry Service | 8761 | Eureka Server — service discovery            |
+| Config Service   | 8888 | Spring Cloud Config — centralized config     |
+| Auth Service     | 8082 | JWT authentication & user management         |
+| Product Service  | 8080 | Product catalog, categories, images & stock  |
+| Invoice Service  | 8084 | Shopping cart & invoice/checkout             |
+| Gateway Service  | 9090 | API Gateway — single entry point for clients |
+| Admin Service    | 9091 | Spring Boot Admin — monitoring dashboard     |
 
-### 2. Product Service (`/product`)
-*   **Port:** `8080`
-*   **Config:** `application.properties` + `application-local.properties`
-*   **Role:** Resource Server managing the product catalog, inventory, and categorization.
-*   **Security:** Endpoints secured via a custom `JwtAuthFilter`, implementing Role-Based Access Control (RBAC):
-    *   **`ADMIN` + `CUSTOMER`:** `GET /category/active`, `GET /product/{id}`, `GET /product/{id}/image`
-    *   **`ADMIN` only:** All other CRUD operations (products, categories, images)
-*   **Key Features:**
-    *   **Categories (`/category`):** Full CRUD with enable/disable (soft delete via `status`). Unique constraints on `category` name and `tag`.
-    *   **Products (`/product`):** Full CRUD with enable/disable. Unique constraints on `gtin` and `product` name. Product detail includes category name via JPQL join.
-    *   **Product Images (`/product/{id}/image`):** Upload (Base64 → PNG file), list, and delete. Images stored on filesystem at `uploads/img/product/{uuid}.png`.
-*   **Error Handling:** `RestExceptionHandler` catches `ApiException`, `MethodArgumentNotValidException`, and generic exceptions. Returns structured `ExceptionResponse` objects.
-*   **Note:** No Lombok — uses manual getters/setters.
+---
 
-### 3. Customer Service (`/customer-service`)
-*   **Status:** Placeholder — not yet implemented.
+## Tech Stack
+
+- **Language:** Java 21
+- **Core Framework:** Spring Boot 4.0.3
+- **Cloud:** Spring Cloud 2025.1.1 (Eureka, Config, Gateway)
+- **Security:** Spring Security + JWT (jjwt 0.11.5, HMAC-SHA256)
+- **Data:** Spring Data JPA + Hibernate ORM + MySQL (`dwb_database`)
+- **Build:** Maven Wrapper (`mvnw`)
+- **Docs:** Springdoc OpenAPI / Swagger UI
+- **Monitoring:** Spring Boot Admin + Actuator
+
+---
+
+## Core Features
+
+### Auth Service (`/auth-service/auth` — port 8082)
+- `POST /user` — User registration (default role: `CUSTOMER`)
+- `POST /login` — JWT token generation (1 hour expiration)
+- `GET /user` — List all users (`Administrator` only)
+
+### Product Service (`/product` — port 8080)
+- **Categories:** Full CRUD with enable/disable (soft delete)
+- **Products:** Full CRUD, search by ID or GTIN, enable/disable
+- **Product Images:** Base64 upload, list, delete
+- **Stock:** `PATCH /product/gtin/{gtin}/stock` — update stock quantities
+- **RBAC:** `ADMIN` full access; `CUSTOMER` read-only on active items
+
+### Invoice Service (`/invoice` — port 8084)
+- **Shopping Cart:**
+  - `POST /cart-item` — Add product to cart (validates stock via product service)
+  - `GET /cart-item` — List cart items with product name, price, quantity
+  - `DELETE /cart-item/{id}` — Remove specific item
+  - `DELETE /cart-item` — Clear entire cart
+- **Checkout:**
+  - `POST /invoice` — Finalize purchase: validates stock, calculates totals (16% IVA), saves invoice, decrements stock, clears cart
+  - `GET /invoice` — List invoices (admin: all, customer: own)
+  - `GET /invoice/{id}` — Invoice detail with items
+
+### Infrastructure Services
+- **Registry (Eureka):** Service discovery at `http://localhost:8761`
+- **Config Server:** Centralized properties at `http://localhost:8888`
+- **Gateway:** Single entry point at `http://localhost:9090`
+- **Admin:** Monitoring dashboard at `http://localhost:9091`
 
 ---
 
@@ -70,7 +110,12 @@ This project is built following modern industry standards for enterprise Java de
 
 ```
 DWB/
-├── auth-service/auth/              # Auth microservice
+├── registry-service/               # Eureka Server (8761)
+├── config-service/                 # Spring Cloud Config (8888)
+├── gateway-service/                # API Gateway (9090)
+├── admin-service/                  # Spring Boot Admin (9091)
+│
+├── auth-service/auth/              # Auth microservice (8082)
 │   └── src/main/java/com/auth/
 │       ├── controller/             # CtrlAuth, CtrlUser
 │       ├── dto/in/                 # LoginRequest, UserRequest
@@ -82,22 +127,35 @@ DWB/
 │       ├── service/                # SvcUser/SvcUserImp, DefaultUserAuthentication
 │       └── util/                   # JwtUtil
 │
-├── product/                        # Product microservice
+├── product/                        # Product microservice (8080)
 │   └── src/main/java/com/product/
-│       ├── api/
-│       │   ├── controller/         # CtrlProduct, CtrlCategory
-│       │   ├── dto/in/             # DtoProductIn, DtoCategoryIn, DtoProductImageIn
-│       │   ├── dto/out/            # DtoProductOut, DtoProductListOut
-│       │   ├── entity/             # Product, Category, ProductImage
-│       │   ├── repository/         # RepoProduct, RepoProductImage, CategoryRepository
-│       │   └── service/            # SvcProduct/SvcProductImp, SvcProductImage/SvcProductImageImp
-│       │                           # CategoryService/CategoryServiceImpl
+│       ├── api/controller/         # CtrlProduct, CtrlCategory
+│       ├── api/dto/in/             # DtoProductIn, DtoCategoryIn, DtoStockIn
+│       ├── api/dto/out/            # DtoProductOut, DtoProductListOut
+│       ├── api/entity/             # Product, Category, ProductImage
+│       ├── api/repository/         # RepoProduct, CategoryRepository
+│       ├── api/service/            # SvcProduct/SvcProductImp, CategoryService/Impl
 │       ├── common/mapper/          # MapperProduct
-│       ├── config/
-│       │   ├── jwt/                # JwtAuthFilter, JwtUtil
-│       │   └── security/           # SecurityConfig, CorsConfig
-│       └── exception/              # ApiException, DBAccessException,
-│                                   # ExceptionResponse, RestExceptionHandler
+│       ├── config/jwt/             # JwtAuthFilter, JwtUtil
+│       ├── config/security/        # SecurityConfig, CorsConfig
+│       ├── config/openapi/         # OpenApiConfig
+│       └── exception/              # ApiException, DBAccessException, RestExceptionHandler
+│
+├── invoice/                        # Invoice microservice (8084)
+│   └── src/main/java/com/invoice/
+│       ├── api/controller/         # CtrlInvoice, CtrlCartItem
+│       ├── api/dto/in/             # DtoCartItemIn
+│       ├── api/dto/out/            # DtoCartItemOut
+│       ├── api/dto/                # ApiResponse, DtoInvoiceList, DtoProductResponse
+│       ├── api/entity/             # Invoice, InvoiceItem, CartItem
+│       ├── api/repository/         # RepoInvoice, RepoCartItem
+│       ├── api/service/            # SvcInvoice/Imp, SvcCartItem/Imp
+│       ├── commons/mapper/         # MapperInvoice
+│       ├── commons/util/           # JwtDecoder
+│       ├── config/                 # RestTemplateConfig
+│       ├── config/jwt/             # JwtAuthFilter, JwtUtil, SecurityConfig, CorsConfig
+│       ├── config/openapi/         # OpenApiConfig
+│       └── exception/              # ApiException, DBAccessException, RestExceptionHandler
 │
 └── customer-service/               # Placeholder (not yet implemented)
 ```
@@ -107,58 +165,88 @@ DWB/
 ## Local Development Setup
 
 ### Prerequisites
-1.  **Java 21** installed and configured in your environment variables.
-2.  **MySQL Server** running on port `3306`.
-3.  A local database named `dwb_database` configured with default credentials (`root` / `root`) or updated in the respective properties/yaml files.
+1. **Java 21** installed
+2. **MySQL** running on port `3306`
+3. Database `dwb_database` with credentials `root/root`
+4. Run the DDL scripts in `invoice/src/main/resources/db/` to create cart and invoice tables
 
-### Execution Steps
+### Startup Order
 
-Due to its distributed architecture, each microservice must be run in a separate terminal instance.
+Start services in this exact order:
 
-**Step 1: Start the Auth Service**
 ```bash
-cd auth-service/auth
-./mvnw clean spring-boot:run
+# 1. Registry Service (wait until Eureka dashboard shows at http://localhost:8761)
+cd registry-service && ./mvnw spring-boot:run
+
+# 2. Config Service
+cd config-service && ./mvnw spring-boot:run
+
+# 3. Business Services (can start in parallel)
+cd auth-service/auth && ./mvnw spring-boot:run
+cd product && ./mvnw spring-boot:run
+cd invoice && ./mvnw spring-boot:run
+
+# 4. Gateway (once business services are registered in Eureka)
+cd gateway-service && ./mvnw spring-boot:run
+
+# 5. Admin (optional — monitoring dashboard)
+cd admin-service && ./mvnw spring-boot:run
 ```
 
-**Step 2: Start the Product Service**
-```bash
-cd product
-./mvnw clean spring-boot:run
-```
+### Quick Test Flow (via Gateway — port 9090)
 
-**Step 3: Identity Creation (via Postman or similar client)**
-
-1. Register a user:
+1. **Register a user:**
    ```
-   POST http://localhost:8082/user
+   POST http://localhost:9090/user
    ```
    ```json
    {
-     "username": "admin",
-     "email": "admin@example.com",
-     "password": "Admin@123",
-     "name": "Admin",
+     "username": "customer1",
+     "email": "customer1@example.com",
+     "password": "Customer@123",
+     "name": "Test",
      "lastName": "User",
      "phoneNumber": "5551234567"
    }
    ```
-2. *Admin Note:* The system assigns the `"User"` role by default. To gain full access, manually update your role in the database (e.g., via DBeaver):
-   ```sql
-   UPDATE user_roles SET roles = 'ADMIN' WHERE user_id = 1;
+
+2. **Login:**
    ```
-3. Login to get your JWT:
-   ```
-   POST http://localhost:8082/login
+   POST http://localhost:9090/login
    ```
    ```json
-   {
-     "username": "admin",
-     "password": "Admin@123"
-   }
+   { "username": "customer1", "password": "Customer@123" }
    ```
    Response: `{"token": "eyJhbGciOi..."}`
 
-**Step 4: Consuming the Secure API**
+3. **Add to cart** (use Bearer token):
+   ```
+   POST http://localhost:9090/cart-item
+   Authorization: Bearer <token>
+   ```
+   ```json
+   { "gtin": "7501055363513", "quantity": 2 }
+   ```
 
-Copy the generated token. For any subsequent request to the Product service (e.g., `GET http://localhost:8080/product/1`), go to the **Authorization** tab, select **Bearer Token**, paste your token, and execute the request.
+4. **View cart:**
+   ```
+   GET http://localhost:9090/cart-item
+   ```
+
+5. **Checkout:**
+   ```
+   POST http://localhost:9090/invoice
+   ```
+
+6. **View invoices:**
+   ```
+   GET http://localhost:9090/invoice
+   ```
+
+### Swagger UI
+- Product: http://localhost:8080/swagger-ui/index.html
+- Invoice: http://localhost:8084/swagger-ui/index.html
+
+### Monitoring
+- Eureka Dashboard: http://localhost:8761
+- Admin Dashboard: http://localhost:9091
