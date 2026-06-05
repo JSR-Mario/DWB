@@ -156,8 +156,6 @@ DWB/
 │       ├── config/jwt/             # JwtAuthFilter, JwtUtil, SecurityConfig, CorsConfig
 │       ├── config/openapi/         # OpenApiConfig
 │       └── exception/              # ApiException, DBAccessException, RestExceptionHandler
-│
-└── customer-service/               # Placeholder (not yet implemented)
 ```
 
 ---
@@ -169,6 +167,23 @@ DWB/
 2. **MySQL** running on port `3306`
 3. Database `dwb_database` with credentials `root/root`
 4. Run the DDL scripts in `invoice/src/main/resources/db/` to create cart and invoice tables
+
+### Compilation
+
+Each service compiles independently — run from each service directory:
+
+```bash
+# Compilar todos los servicios de negocio
+cd product && ./mvnw compile -DskipTests && cd ..
+cd auth-service/auth && ./mvnw compile -DskipTests && cd ../..
+cd invoice && ./mvnw compile -DskipTests && cd ..
+
+# Compilar infraestructura
+cd registry-service && ./mvnw compile -DskipTests && cd ..
+cd config-service && ./mvnw compile -DskipTests && cd ..
+cd gateway-service && ./mvnw compile -DskipTests && cd ..
+cd admin-service && ./mvnw compile -DskipTests && cd ..
+```
 
 ### Startup Order
 
@@ -245,6 +260,7 @@ cd admin-service && ./mvnw spring-boot:run
 
 ### Swagger UI
 - Product: http://localhost:8080/swagger-ui/index.html
+- Auth: http://localhost:8082/swagger-ui/index.html
 - Invoice: http://localhost:8084/swagger-ui/index.html
 
 ### Monitoring

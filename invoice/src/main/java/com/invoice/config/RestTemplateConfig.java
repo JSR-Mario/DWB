@@ -2,7 +2,6 @@ package com.invoice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -16,7 +15,7 @@ public class RestTemplateConfig {
 
 	@Bean
 	public RestTemplate restTemplate() {
-		RestTemplate restTemplate = new RestTemplate();
+		RestTemplate restTemplate = new RestTemplate(new org.springframework.http.client.JdkClientHttpRequestFactory());
 
 		// Interceptor que reenvía el JWT del usuario al servicio destino
 		restTemplate.getInterceptors().add((request, body, execution) -> {

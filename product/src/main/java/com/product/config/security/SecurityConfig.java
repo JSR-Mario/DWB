@@ -42,6 +42,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/product").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/product", "/product/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/product", "/product/**").hasAuthority("ADMIN")
+                // Stock update — CUSTOMER necesita esto para el checkout
+                .requestMatchers(HttpMethod.PATCH, "/product/gtin/*/stock").hasAnyAuthority("ADMIN", "CUSTOMER")
                 .requestMatchers(HttpMethod.PATCH, "/product", "/product/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/product", "/product/**").hasAuthority("ADMIN")
                 
