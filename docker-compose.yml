@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  registry-service:
+    build:
+      context: .
+      args:
+        SERVICE_DIR: registry-service
+    container_name: registry-service
+    network_mode: "host"
+
+  config-service:
+    build:
+      context: .
+      args:
+        SERVICE_DIR: config-service
+    container_name: config-service
+    network_mode: "host"
+    depends_on:
+      - registry-service
+
+  gateway-service:
+    build:
+      context: .
+      args:
+        SERVICE_DIR: gateway-service
+    container_name: gateway-service
+    network_mode: "host"
+    depends_on:
+      - registry-service
+
+  admin-service:
+    build:
+      context: .
+      args:
+        SERVICE_DIR: admin-service
+    container_name: admin-service
+    network_mode: "host"
+    depends_on:
+      - registry-service
+
+  auth-service:
+    build:
+      context: .
+      args:
+        SERVICE_DIR: auth-service/auth
+    container_name: auth-service
+    network_mode: "host"
+    depends_on:
+      - registry-service
+
+  product-service:
+    build:
+      context: .
+      args:
+        SERVICE_DIR: product
+    container_name: product-service
+    network_mode: "host"
+    depends_on:
+      - registry-service
+
+  invoice-service:
+    build:
+      context: .
+      args:
+        SERVICE_DIR: invoice
+    container_name: invoice-service
+    network_mode: "host"
+    depends_on:
+      - registry-service
