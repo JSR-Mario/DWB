@@ -24,6 +24,7 @@ public class SecurityConfig {
 		.authorizeHttpRequests(
 				auth -> auth
 				.requestMatchers("/error", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
+				.requestMatchers("/coupon/**").hasAuthority("ADMIN")
 				.requestMatchers("/cart-item/**").hasAuthority("CUSTOMER")
 				.requestMatchers(HttpMethod.GET, "/invoice/**").hasAnyAuthority("ADMIN", "CUSTOMER")
 				.requestMatchers(HttpMethod.POST,"/invoice").hasAuthority("CUSTOMER")

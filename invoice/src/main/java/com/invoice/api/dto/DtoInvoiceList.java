@@ -19,7 +19,6 @@ public class DtoInvoiceList {
 	}
 
 	public DtoInvoiceList(Integer id, Integer user_id, String created_at, Double subtotal, Double taxes, Double total) {
-		super();
 		this.id = id;
 		this.user_id = user_id;
 		this.created_at = created_at;

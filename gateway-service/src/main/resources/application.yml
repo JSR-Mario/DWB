@@ -25,7 +25,7 @@ spring:
             - id: invoice-service
               uri: lb://invoice-service
               predicates:
-                - Path=/invoice/**, /cart-item/**
+                - Path=/invoice/**, /cart-item/**, /coupon/**
 
 eureka:
   client:

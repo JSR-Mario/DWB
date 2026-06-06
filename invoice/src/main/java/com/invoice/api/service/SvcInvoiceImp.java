@@ -20,10 +20,13 @@ import org.springframework.web.client.RestTemplate;
 import com.invoice.api.dto.ApiResponse;
 import com.invoice.api.dto.DtoInvoiceList;
 import com.invoice.api.dto.DtoProductResponse;
+import com.invoice.api.dto.in.DtoCheckoutIn;
 import com.invoice.api.entity.CartItem;
+import com.invoice.api.entity.Coupon;
 import com.invoice.api.entity.Invoice;
 import com.invoice.api.entity.InvoiceItem;
 import com.invoice.api.repository.RepoCartItem;
+import com.invoice.api.repository.RepoCoupon;
 import com.invoice.api.repository.RepoInvoice;
 import com.invoice.commons.mapper.MapperInvoice;
 import com.invoice.commons.util.JwtDecoder;
@@ -40,6 +43,9 @@ public class SvcInvoiceImp implements SvcInvoice {
 
 	@Autowired
 	private RepoCartItem repoCartItem;
+
+	@Autowired
+	private RepoCoupon repoCoupon;
 
 	@Autowired
 	private JwtDecoder jwtDecoder;
@@ -74,7 +80,7 @@ public class SvcInvoiceImp implements SvcInvoice {
 			if (!jwtDecoder.isAdmin()) {
 				Integer user_id = jwtDecoder.getUserId();
 				if (!invoice.getUser_id().equals(user_id)) {
-					throw new ApiException(HttpStatus.FORBIDDEN, "El token no es válido para consultar esta factura");
+					throw new ApiException(HttpStatus.FORBIDDEN, "El token no es valido para consultar esta factura");
 				}
 			}
 			return invoice;
@@ -87,7 +93,7 @@ public class SvcInvoiceImp implements SvcInvoice {
 
 	@Override
 	@Transactional
-	public ApiResponse create() {
+	public ApiResponse create(DtoCheckoutIn dto) {
 		try {
 			Integer userId = jwtDecoder.getUserId();
 
@@ -138,6 +144,25 @@ public class SvcInvoiceImp implements SvcInvoice {
 				invoiceSubtotal += itemSubtotal;
 			}
 
+			// Aplicar cupon de descuento si se proporciono
+			double discountAmount = 0.0;
+			String appliedCouponCode = null;
+
+			if (dto != null && dto.getCouponCode() != null && !dto.getCouponCode().isBlank()) {
+				String code = dto.getCouponCode().toUpperCase();
+				Coupon coupon = repoCoupon.findByCodeAndActive(code, 1)
+						.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,
+								"El cupon " + code + " no existe o no esta activo"));
+
+				discountAmount = invoiceTotal * (coupon.getDiscountPercentage() / 100.0);
+				appliedCouponCode = code;
+
+				// Recalcular totales con el descuento aplicado
+				invoiceTotal = invoiceTotal - discountAmount;
+				invoiceTaxes = invoiceTotal * 0.16;
+				invoiceSubtotal = invoiceTotal - invoiceTaxes;
+			}
+
 			// 4. Guardar la factura con sus items
 			Invoice invoice = new Invoice();
 			invoice.setUser_id(userId);
@@ -147,6 +172,27 @@ public class SvcInvoiceImp implements SvcInvoice {
 			invoice.setSubtotal(invoiceSubtotal);
 			invoice.setStatus(1);
 			invoice.setItems(invoiceItems);
+
+			// Direccion de envio (si se proporciono)
+			if (dto != null && dto.getShipping() != null) {
+				invoice.setShippingStreet(dto.getShipping().getStreet());
+				invoice.setShippingCity(dto.getShipping().getCity());
+				invoice.setShippingState(dto.getShipping().getState());
+				invoice.setShippingZipCode(dto.getShipping().getZipCode());
+			}
+
+			// Informacion de pago (si se proporciono)
+			if (dto != null && dto.getPayment() != null) {
+				invoice.setPaymentMethod(dto.getPayment().getMethod());
+				invoice.setCardLastFour(dto.getPayment().getCardLastFour());
+				invoice.setCardHolder(dto.getPayment().getCardHolder());
+			}
+
+			// Cupon de descuento (si se aplico)
+			if (appliedCouponCode != null) {
+				invoice.setCouponCode(appliedCouponCode);
+				invoice.setDiscount(discountAmount);
+			}
 
 			repo.save(invoice);
 

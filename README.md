@@ -117,6 +117,10 @@ docker compose down
   - *Calculates totals with 16% tax.*
   - *Automatically decreases stock in the Product Service.*
   - *Generates the invoice and clears the cart.*
+  - *[BONUS] Supports optional Shipping Address, Payment Information, and Discount Coupons.*
+
+### 4. Admin Management
+- **Manage Coupons:** `POST http://localhost:9090/coupon`, `GET http://localhost:9090/coupon`, `DELETE http://localhost:9090/coupon/{id}` (Requires `ADMIN` role)
 
 ---
 
