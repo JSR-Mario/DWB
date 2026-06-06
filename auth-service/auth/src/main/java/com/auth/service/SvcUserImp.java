@@ -35,7 +35,7 @@ public class SvcUserImp implements SvcUser {
         user.setPhoneNumber(request.getPhoneNumber());
         // Encriptamos DESPUÉS de pasar las validaciones del DTO
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRoles(Set.of("User"));
+        user.setRoles(Set.of("CUSTOMER"));
         repoUser.save(user);
         return "Usuario registrado exitosamente";
     }

@@ -1,85 +1,137 @@
-<!-- 
-<div align="center">
-  <img src="path/to/your/project-banner-or-logo.png" alt="Project Banner" width="100%">
-</div> 
--->
-
 <div align="center">
 
 # E-Commerce Microservices Architecture (Backend)
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.x-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
-![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.3-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-2025.1.1-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Hibernate](https://img.shields.io/badge/Hibernate-ORM-59666C?style=for-the-badge&logo=hibernate&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
 </div>
 
-Central repository for the Web Backend Development course (UNAM). This project demonstrates a robust, scalable backend ecosystem built on an independent microservices architecture, working concurrently to manage core business logic.
+Final project for the Web Backend Development course (UNAM). This repository contains the source code for a complete e-commerce backend, implementing a shopping cart, invoicing (checkout), and a modern microservices infrastructure using Spring Cloud and Docker.
 
 ---
 
-## Architecture & Tech Stack
+## Architecture Overview
 
-This project is built following modern industry standards for enterprise Java development:
-
-*   **Language:** Java 21
-*   **Core Framework:** Spring Boot 4.x
-*   **Security:** Spring Security with Stateless JSON Web Tokens (JWT)
-*   **Data Persistence:** Spring Data JPA + Hibernate ORM
-*   **Database:** MySQL
-*   **Build Tool:** Maven Wrapper (`mvnw`)
-*   **Validation:** Jakarta Validation (`spring-boot-starter-validation`)
+```text
+                          ┌─────────────────┐
+                          │   Admin (9091)  │
+                          │  Spring Boot    │
+                          │  Admin Server   │
+                          └────────┬────────┘
+                                   │ monitors
+┌──────────────┐          ┌────────▼────────┐
+│ Config (8888)│◄─────────│ Registry (8761) │
+│ Cloud Config │  eureka  │  Eureka Server  │
+└──────────────┘          └────────▲────────┘
+                                   │ registers
+              ┌────────────────────┼────────────────────┐
+              │                    │                    │
+     ┌────────┴───────┐  ┌────────┴───────┐  ┌────────┴───────┐
+     │  Auth (8082)   │  │ Product (8080) │  │ Invoice (8084) │
+     │  JWT / Users   │  │  Catalog/Stock │  │  Cart/Invoice  │
+     └────────────────┘  └────────────────┘  └────────────────┘
+              ▲                    ▲                    ▲
+              │                    │                    │
+              └────────────────────┴────────────────────┘
+                          ┌────────┴────────┐
+                          │  Gateway (9090) │
+                          │  Cloud Gateway  │
+                          └─────────────────┘
+                                   ▲
+                            Client Requests
+```
 
 ---
 
-## Microservices & Core Features
+## Tech Stack
 
-### 1. Auth Service (`/auth-service`)
-*   **Port:** `8082`
-*   **Role:** Identity Provider (IdP) and Authorization Server. Handles user management and JWT credential generation.
-*   **Key Features:**
-    *   `POST /user`: Secure user registration featuring password encryption via `BCryptPasswordEncoder`.
-    *   `POST /login`: Credential validation and JWT generation (signed using HMAC-SHA256).
-
-### 2. Product Service (`/product`)
-*   **Port:** `8080`
-*   **Role:** Resource Server managing the product catalog, inventory, and categorization.
-*   **Security:** Endpoints are secured via a custom `JwtAuthFilter`, implementing Role-Based Access Control (RBAC) with differentiated access for `ADMIN` and `CUSTOMER` roles.
-*   **Key Features:**
-    *   **Catalog & Categories:** Full CRUD capabilities with strict field uniqueness constraints (GTIN, Names, Tags).
-    *   **Media Management:** Physical filesystem storage for images (`uploads/img/`). Images are dynamically processed and returned as Base64 encoded strings via custom JPQL queries (`INNER JOIN`).
+- **Language:** Java 21
+- **Core Framework:** Spring Boot 4.0.3
+- **Cloud Ecosystem:** Spring Cloud 2025.1.1 (Eureka, Config Server, API Gateway)
+- **Security:** Spring Security + JWT (jjwt 0.11.5 with HMAC-SHA256)
+- **Persistence:** Spring Data JPA + Hibernate ORM + MySQL
+- **Deployment:** Docker and Docker Compose
+- **Documentation:** Springdoc OpenAPI / Swagger UI
+- **Monitoring:** Spring Boot Admin and Spring Boot Actuator
 
 ---
 
-## Local Development Setup
+## Local Deployment (Docker)
+
+The project is fully dockerized. We use `network_mode: "host"` in Docker Compose so that the containers can natively communicate with your local MySQL installation without dealing with complex virtual IPs.
 
 ### Prerequisites
-1.  **Java 21** installed and configured in your environment variables.
-2.  **MySQL Server** running on port `3306`.
-3.  A local database named `dwb_database` configured with default credentials (`root` / `root`) or updated in the `application-local.properties` file.
+1. **Docker** and **Docker Compose** installed.
+2. **MySQL** running on your local machine on port `3306`.
+3. Create the `dwb_database` with username `root` and password `root`.
+4. Run the DDL scripts provided in the class repositories to create the base tables.
 
-### Execution Steps
+### Starting the Project
 
-Due to its distributed architecture, each microservice must be run in a separate terminal instance.
+To build the images and start all microservices in the background, run this command from the root directory:
 
-**Step 1: Start the Auth Service**
 ```bash
-cd auth-service/auth
-./mvnw clean spring-boot:run
+docker compose up -d --build
 ```
 
-**Step 2: Start the Product Service**
+### Viewing the Logs
+
+To watch the services starting up in real-time (useful to see when Eureka has registered everything):
 ```bash
-cd product
-./mvnw clean spring-boot:run
+docker compose logs -f
 ```
 
-**Step 3: Identity Creation (via Postman or similar client)**
-1. Send a `POST` request to `http://localhost:8082/user` with your registration payload.
-2. *Admin Note:* The system assigns the `"User"` role by default. To gain full access, manually update your role in the database (e.g., via DBeaver): `UPDATE user_roles SET roles = 'ADMIN' WHERE user_id = 1;`
-3. Send a `POST` request to `http://localhost:8082/login` with your credentials to receive your **JWT Token**.
+Or for a specific service:
+```bash
+docker compose logs -f product-service
+```
 
-**Step 4: Consuming the Secure API**
-Copy the generated token. For any subsequent request to the Product service (e.g., `GET http://localhost:8080/product/1`), go to the **Authorization** tab, select **Bearer Token**, paste your token, and execute the request.
+### Stopping the Services
+
+```bash
+docker compose down
+```
+
+---
+
+## Testing the API (Main Endpoints)
+
+**Important Note:** All client requests must be made through the API Gateway (`port 9090`), which handles routing to the correct microservice.
+
+### 1. Authentication (Auth Service)
+- **Register user:** `POST http://localhost:9090/user`
+- **Login (Get JWT):** `POST http://localhost:9090/login`
+
+### 2. Catalog (Product Service)
+- **List products:** `GET http://localhost:9090/product`
+- **Product detail by GTIN:** `GET http://localhost:9090/product/gtin/{gtin}`
+
+### 3. Cart & Checkout (Invoice Service)
+- **Add to cart:** `POST http://localhost:9090/cart-item` (Requires Header `Authorization: Bearer <token>`)
+- **View cart:** `GET http://localhost:9090/cart-item`
+- **Checkout:** `POST http://localhost:9090/invoice`
+  - *Calculates totals with 16% tax.*
+  - *Automatically decreases stock in the Product Service.*
+  - *Generates the invoice and clears the cart.*
+  - *[BONUS] Supports optional Shipping Address, Payment Information, and Discount Coupons.*
+
+### 4. Admin Management
+- **Manage Coupons:** `POST http://localhost:9090/coupon`, `GET http://localhost:9090/coupon`, `DELETE http://localhost:9090/coupon/{id}` (Requires `ADMIN` role)
+
+---
+
+## Interactive Documentation (Swagger)
+
+Once the project is running, you can access the interactive API documentation in your browser:
+- **Product API:** http://localhost:8080/swagger-ui/index.html
+- **Auth API:** http://localhost:8082/swagger-ui/index.html
+- **Invoice API:** http://localhost:8084/swagger-ui/index.html
+
+## Monitoring Dashboards
+
+- **Eureka (Service Discovery):** http://localhost:8761
+- **Spring Boot Admin:** http://localhost:9091

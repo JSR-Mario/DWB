@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.product.api.dto.in.DtoProductImageIn;
 import com.product.api.dto.in.DtoProductIn;
+import com.product.api.dto.in.DtoStockIn;
 import com.product.api.dto.out.DtoProductListOut;
 import com.product.api.dto.out.DtoProductOut;
 import com.product.api.entity.ProductImage;
@@ -31,7 +32,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/product")
-@Tag(name = "Product", description = "Catálogo de productos")
+@Tag(name = "Product", description = "Administracion de productos")
 public class CtrlProduct {
 
 	@Autowired
@@ -60,6 +61,17 @@ public class CtrlProduct {
 	@GetMapping("/{id}")
 	public ResponseEntity<DtoProductOut> getProduct(@PathVariable Integer id) {
 		return svc.getProduct(id);
+	}
+
+	@Operation(summary = "Consultar producto por GTIN", description = "Obtiene el detalle de un producto por su GTIN. Accesible por ADMIN y CUSTOMER.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Detalle del producto obtenido exitosamente"),
+			@ApiResponse(responseCode = "401", description = "No autorizado", content = @Content),
+			@ApiResponse(responseCode = "404", description = "Producto no encontrado", content = @Content)
+	})
+	@GetMapping("/gtin/{gtin}")
+	public ResponseEntity<DtoProductOut> getProductByGtin(@PathVariable String gtin) {
+		return svc.getProductByGtin(gtin);
 	}
 
 	@Operation(summary = "Registrar nuevo producto", description = "Añade un nuevo producto al catálogo validando que el GTIN y el nombre sean únicos. Requiere rol ADMIN.")
@@ -106,6 +118,17 @@ public class CtrlProduct {
 	@PatchMapping("/{id}/disable")
 	public ResponseEntity<String> disableProduct(@PathVariable Integer id) {
 		return svc.disableProduct(id);
+	}
+
+	@Operation(summary = "Actualizar stock", description = "Suma o resta unidades al stock de un producto identificado por GTIN. Accesible por ADMIN y CUSTOMER.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Stock actualizado exitosamente", content = @Content),
+			@ApiResponse(responseCode = "401", description = "No autorizado", content = @Content),
+			@ApiResponse(responseCode = "404", description = "Producto no encontrado", content = @Content)
+	})
+	@PatchMapping("/gtin/{gtin}/stock")
+	public ResponseEntity<String> updateStock(@PathVariable String gtin, @Valid @RequestBody DtoStockIn in) {
+		return svc.updateStock(gtin, in);
 	}
 
 	// ── Product Image ──────────────────────────────────────────────

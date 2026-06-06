@@ -26,7 +26,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
                 auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/error", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/info", "/actuator/health").permitAll()
+                .requestMatchers("/error", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
                 
                 // Categorias
                 .requestMatchers(HttpMethod.GET, "/category/active").hasAnyAuthority("ADMIN", "CUSTOMER")
@@ -35,12 +35,15 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/category", "/category/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/category", "/category/**").hasAuthority("ADMIN")
                 
-                // Productos
+                // Productos — lectura compartida, escritura solo ADMIN
                 .requestMatchers(HttpMethod.GET, "/product/{id}").hasAnyAuthority("ADMIN", "CUSTOMER")
                 .requestMatchers(HttpMethod.GET, "/product/{id}/image").hasAnyAuthority("ADMIN", "CUSTOMER")
+                .requestMatchers(HttpMethod.GET, "/product/gtin/{gtin}").hasAnyAuthority("ADMIN", "CUSTOMER")
                 .requestMatchers(HttpMethod.GET, "/product").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/product", "/product/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/product", "/product/**").hasAuthority("ADMIN")
+                // Stock update — CUSTOMER necesita esto para el checkout
+                .requestMatchers(HttpMethod.PATCH, "/product/gtin/*/stock").hasAnyAuthority("ADMIN", "CUSTOMER")
                 .requestMatchers(HttpMethod.PATCH, "/product", "/product/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/product", "/product/**").hasAuthority("ADMIN")
                 

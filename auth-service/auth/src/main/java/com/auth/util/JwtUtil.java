@@ -14,7 +14,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private final String SECRET =
-            "mi_clave_super_secreta_para_jwt_segura_2026_abcdef";
+            "dwb_jwt_s3cr3t_2026_X9mK4wR7nP2qZ5vL8tJ6bF0cH3gA1dY";
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
     // Generar Token

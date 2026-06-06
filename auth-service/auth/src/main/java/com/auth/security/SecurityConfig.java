@@ -28,9 +28,11 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
 
-                        // Rutas públicas
+                        // Rutas publicas
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
+                        .requestMatchers("/error", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
 
                         // Solo ADMIN
                         .requestMatchers(HttpMethod.GET, "/user").hasAuthority("Administrator")

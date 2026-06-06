@@ -17,17 +17,16 @@ import com.product.api.dto.in.DtoCategoryIn;
 import com.product.api.entity.Category;
 import com.product.api.service.CategoryService;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/category")
-@Tag(name = "Category", description = "Catálogo de categorías")
+@Tag(name = "Category", description = "Administracion de categorias")
 public class CtrlCategory {
 
     @Autowired
